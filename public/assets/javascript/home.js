@@ -5,27 +5,44 @@ $(function() {
 
         $('.articlesScrapedBody').empty();
 
-        $.ajax("/api/scrape", {
+        $.ajax("/api/all", {
             type: "GET"
         }).then(function(response) {
+            
+            console.log(response)
 
-            let numberChanged = response
-            let newText = $('<div>');
+            let oldLength = response;
 
-            if (numberChanged == 0) {
-                newText.text("Scraper is up to date")
-                $('.articlesScrapedBody').append(newText)
-                $('#scrapeArticlesModal').modal('show');
-            }
+            $.ajax("/api/scrape", {
+                type: "GET"
+            }).then(function(response) {
 
-            else {
-                newText.text(numberChanged + " new articles scraped!")
-                $('.articlesScrapedBody').append(newText)
-                $('#scrapeArticlesModal').modal('show');
-            }
 
-        
+                $.ajax("/api/reduce", {
+                    type: "GET"
+                }).then(function(response) {
+
+                    let newText = $("<div>");
+                    let newLength = response.length;
+                    let numberChanged = newLength - oldLength;
+
+                    if (numberChanged == 0) {
+                        newText.text("Scraper is up to date")
+                        $('.articlesScrapedBody').append(newText)
+                        $('#scrapeArticlesModal').modal('show');
+                    }
+
+                    else {
+                        newText.text(numberChanged + " new articles scraped!")
+                        $('.articlesScrapedBody').append(newText)
+                        $('#scrapeArticlesModal').modal('show');
+                    }
+
+                })
+
+            })
         })
+
     });
 
     $("#closeScrapeButton").on("click", function(event) {

@@ -16,6 +16,9 @@ const HeadlineSchema = new Schema ({
 	photo: {
 		type: String
 	},
+	date: {
+		type: Date
+	},
 	saved: {
 		type: Boolean,
 		default: false

@@ -4,6 +4,14 @@ const db = require("../models")
 
 module.exports = function(app) {
 
+    app.get("/api/all", function(req, res) {
+
+        db.Headline.find({}, function(error, response) {
+            res.json(response.length)
+        })
+
+    });
+
     app.get("/api/scrape", function(req, res) {
 
         let newArticles = 0;
@@ -19,32 +27,56 @@ module.exports = function(app) {
                 let summary = $(element).find('.item-info').find('.teaser').find('a').text();
                 let link = $(element).find('.item-info').find('.title').children().attr("href");
                 let photo = $(element).find('.item-image').find('.imagewrap').find('a').find('img').attr("src");
-
+                let date = $(element).find('.item-info').find('.teaser').find('a').find('time').attr("datetime");
 
                 let headlineObject = {
                     headline: headline,
                     summary: summary, 
                     link: link,
-                    photo: photo
+                    photo: photo,
+                    date: date
                 }
 
                 db.Headline.create(headlineObject, function(error) {
                     if (error) console.log("Article already exists: " + headlineObject.headline)
                     else {
                         console.log("New article: " + headlineObject.headline);
-                        newArticles ++;
                     }
 
                     if (i == ($("article.item").length - 1)) {
-                        res.json(newArticles)
+                        res.json("scrape complete")
                     }
                 })
-
 
             });
 
         })
     });
+
+    app.get("/api/reduce", function(req, res) {
+
+        db.Headline.find({ $query: {}, $orderby: { date: -1 } }, function(error, found) {
+            if (error) res.json(error);
+
+            else {
+                let countLength = found.length;
+                let overflow = countLength - 25;
+                let overflowArray = [];
+
+                for (var i = 0; i < (overflow); i ++) {
+                    overflowArray.push(found[25+i]._id);
+                }
+
+                db.Headline.remove({_id: {$in: overflowArray}}, function(error, result) {
+
+                    result["length"] = countLength;
+                    console.log(result)
+                    res.json(result)
+                })
+            }
+        });
+
+    })
 
     app.post("/api/save/article/:id", function(req, res) {
         let articleId = req.params.id;
@@ -98,7 +130,16 @@ module.exports = function(app) {
         // .catch(function(err) {
         //     res.json(err);
         // });
+    });
+
+    app.get("/api/clear", function(req, res) {
+
+        db.Headline.remove()
+        .then(function() {
+            res.json("collections removed")
+        })
     })
+
 }
 
 
