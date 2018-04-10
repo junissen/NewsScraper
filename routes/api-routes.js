@@ -6,19 +6,31 @@ module.exports = function(app) {
 
     app.get("/api/all", function(req, res) {
 
-        db.Headline.find({}, function(error, response) {
+        db.Headline.find({$query: {saved: false} }).sort( { date: -1 })
+        .then( function(response) {
             res.json(response.length)
+            // res.json(response)
         })
 
     });
 
-    app.get("/api/scrape", function(req, res) {
+    app.get("/api/notes/all", function(req, res) {
 
-        let newArticles = 0;
+        db.Note.find({})
+        .then( function(response) {
+            res.json(response)
+            // res.json(response)
+        })
+    });
+
+    // post
+    app.post("/api/scrape", function(req, res) {
 
         request("http://www.npr.org/sections/news/", function(error, response, html) {
 
             const $ = cheerio.load(html);
+
+            console.log($("article.item").length)
 
             $("article.item").each(function(i, element) {
 
@@ -53,32 +65,36 @@ module.exports = function(app) {
         })
     });
 
-    app.get("/api/reduce", function(req, res) {
+    // delete
+    app.delete("/api/reduce", function(req, res) {
 
-        db.Headline.find({ $query: {}, $orderby: { date: -1 } }, function(error, found) {
-            if (error) res.json(error);
+        db.Headline.find({$query: {saved: false} }).sort( { date: -1 })
+        .then( function(found) {
 
-            else {
-                let countLength = found.length;
-                let overflow = countLength - 25;
-                let overflowArray = [];
+            console.log(found.length);
+            let countLength = found.length;
+            let overflow = countLength - 25;
+            console.log(overflow)
+            let overflowArray = [];
 
-                for (var i = 0; i < (overflow); i ++) {
-                    overflowArray.push(found[25+i]._id);
-                }
-
-                db.Headline.remove({_id: {$in: overflowArray}}, function(error, result) {
-
-                    result["length"] = countLength;
-                    console.log(result)
-                    res.json(result)
-                })
+            for (var i = 0; i < (overflow); i ++) {
+                overflowArray.push(found[25+i]._id);
+                console.log(overflowArray)
             }
+
+            db.Headline.remove({_id: {$in: overflowArray}}, function(error, result) {
+
+                result["length"] = countLength;
+                console.log(result)
+                res.json(result)
+
+            })
+
         });
 
     })
 
-    app.post("/api/save/article/:id", function(req, res) {
+    app.put("/api/save/article/:id", function(req, res) {
         let articleId = req.params.id;
 
         db.Headline.findOneAndUpdate(
@@ -92,7 +108,7 @@ module.exports = function(app) {
     });
 
 
-    app.post("/api/delete/article/:id", function(req, res) {
+    app.put("/api/delete/article/:id", function(req, res) {
         let articleId = req.params.id;
 
         db.Headline.findOneAndUpdate(
@@ -117,28 +133,44 @@ module.exports = function(app) {
         })
     });
 
-    app.post("/api/notes/:id", function(req, res) {
+    app.post("/api/create/notes/:id", function(req, res) {
         console.log(req.body);
 
-        // db.Note.create(req.body)
-        // .then(function(dbNote) {
-        //     return db.Headline.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
-        // })
-        // .then(function(result) {
-        //     res.json(result);
-        // })
-        // .catch(function(err) {
-        //     res.json(err);
-        // });
+        db.Note.create(req.body)
+        .then(function(dbNote) {
+            return db.Headline.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+        })
+        .then(function(result) {
+            res.json(result);
+        })
+        .catch(function(err) {
+            res.json(err);
+        });
+
     });
 
+    // delete Headline documents manually if needed
     app.get("/api/clear", function(req, res) {
 
         db.Headline.remove()
         .then(function() {
-            res.json("collections removed")
+            res.json("documents removed from headline collection")
         })
-    })
+
+    });
+
+    // delete Note
+    app.delete("/api/delete/notes/:id", function(req, res) {
+
+        db.Note.remove(
+            {_id: req.params.id}
+        )
+        .then(function(result) {
+            res.json(result)
+        })
+
+    });
+
 
 }
 

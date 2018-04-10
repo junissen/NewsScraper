@@ -9,7 +9,7 @@ $(function() {
         let articleId = $(this).data("id");
 
         $.ajax("/api/delete/article/" + articleId, {
-            type: "POST"
+            type: "PUT"
         }).then(function() {
             let newText = $('<div>');
             newText.text("Article deleted from your Saved Articles");
@@ -19,14 +19,14 @@ $(function() {
 
     });
 
-    $('#deleteArticleButton').on('click', function(event) {
+    $('.deleteSavedArticleModalButton').on('click', function(event) {
 
         event.preventDefault();
 
         $.ajax("/saved", {
             type: "GET"
         }).then(function() {
-            location.reload()
+            location.reload();
             console.log("saved site updated")
         })
 
@@ -38,6 +38,7 @@ $(function() {
 
         let articleId = $(this).data("id");
         $('.noteModalBody').empty();
+        $('.noteAlert').remove();
 
         $.ajax("/api/notes/" + articleId, {
             type: "GET"
@@ -62,16 +63,29 @@ $(function() {
             newFormGroup2.append(newFormGroupLabel2);
             newFormGroup2.append("<textarea id='bodyinput' name='body'></textarea>");
 
-            let newButton = $("<button data-id='" + result._id + "' id='savenote'>Save Note</button>");
 
+            // let newButton = $("<button data-id='" + result._id + "' class='saveNoteButton'>Save Note</button>");
+
+            $('.saveNoteButton').attr("data-id", result._id)
             newForm.append(newFormGroup1);
             newForm.append(newFormGroup2);
-            newForm.append(newButton);
+            // newForm.append(newButton);
 
             $('.noteModalBody').append(newForm)
 
-            for (let i = 0; i < result.notes.length; i ++) {
-                $('#noteList').append("<li>" + result.notes[i] + "</li>")
+            for (let i = 0; i < result.note.length; i ++) {
+                let newCard = $('<div class=card>');
+                newCard.addClass("noteCard")
+                let newCardHeader = $('<div class=card-header>' + result.note[i].title + '</div>');
+                let newCardBody = $('<div class=card-body>');
+                newCardBody.addClass("noteCardBody")
+                newCardBody.text(result.note[i].body)
+                newCard.append(newCardHeader);
+                newCard.append(newCardBody);
+                newCard.append("<button class=deleteNoteButton>Delete</button>");
+
+                $('.noteModalHeader').append(newCard);
+                
             }
         }).then(
             $('#noteModal').modal('show')
@@ -79,31 +93,28 @@ $(function() {
 
     });
 
-    $('#savenote').on("click", function(event) {
+    $('.saveNoteButton').on("click", function(event) {
 
         let articleId = $(this).attr("data-id");
 
-        console.log(articleId)
+        $.ajax("/api/create/notes/" + articleId, {
+            type: "POST",
+            data: {
+                title: $("#titleinput").val(),
+                body: $("#bodyinput").val()
+            }
+        }).then(function(result) {
+            console.log(result);
+            let noteAdded = $('<p>');
+            noteAdded.addClass('noteAlert');
+            noteAdded.text("Note successfully added")
+            $('.alertDiv').append(noteAdded);
+            $("#titleinput").val("");
+            $("#bodyinput").val("");
+        })
 
-        // $.ajax("/api/notes/" + articleId, {
-        //     type: "POST"
-        // }).then(function(result) {
-        //     console.log(result)
-        // })
+    });
 
-        // $.ajax("/api/notes/" + articleId, {
-        //     type: "POST",
-        //     // data: {
-        //     //     title: $("#titleinput").val(),
-        //     //     body: $("#bodyinput").val()
-        //     // }
-        // }).then(function(result) {
-        //     console.log(result);
-        //     // $('#noteModal').modal('hide');
-        //     // $('.noteModalBody').empty();
-        //     // $("#titleinput").val("");
-        //     // $("#bodyinput").val("");
-        // });
-    })
+    // $('.deleteNoteButton').on("click", function(event)
 
 });

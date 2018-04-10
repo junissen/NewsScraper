@@ -1,9 +1,9 @@
 body, html {
-	height: 100%;
+    height: 100%;
 }
 
 body {
-	background-image: url("../images/lined_paper.png");
+    background-image: url("../images/lined_paper.png");
 }
 .titleJumbotron {
     margin: 0px;
@@ -107,4 +107,18 @@ p {
 #titleinput,
 #bodyinput {
     width: 100%
+}
+
+.articleContainer {
+    padding-bottom: 50px;
+    padding-top: 20px
+}
+
+.noteCard {
+    display: block;
+    width: 100%
+}
+
+.noteCardBody {
+    color: black
 }

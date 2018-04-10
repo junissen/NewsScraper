@@ -8,23 +8,26 @@ $(function() {
         $.ajax("/api/all", {
             type: "GET"
         }).then(function(response) {
-            
-            console.log(response)
 
             let oldLength = response;
 
+            console.log(oldLength);
+
             $.ajax("/api/scrape", {
-                type: "GET"
+                type: "POST"
             }).then(function(response) {
 
 
                 $.ajax("/api/reduce", {
-                    type: "GET"
+                    type: "DELETE"
                 }).then(function(response) {
 
                     let newText = $("<div>");
                     let newLength = response.length;
-                    let numberChanged = newLength - oldLength;
+
+                    console.log(newLength);
+
+                    let numberChanged = parseInt(newLength) - parseInt(oldLength);
 
                     if (numberChanged == 0) {
                         newText.text("Scraper is up to date")
@@ -64,7 +67,7 @@ $(function() {
         let articleId = $(this).data("id");
 
         $.ajax("/api/save/article/" + articleId, {
-            type: "POST"
+            type: "PUT"
         }).then(function() {
             let newText = $('<div>');
             newText.text("Article now accessible through your Saved Articles");
@@ -79,7 +82,8 @@ $(function() {
         $.ajax("/", {
             type: "GET"
         }).then(function() {
-            console.log("site updated")
+            console.log("site updated");
+            location.reload();
         })
     });
 

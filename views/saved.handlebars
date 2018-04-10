@@ -82,7 +82,7 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="deleteArticleButton" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary deleteSavedArticleModalButton" id="deleteSavedArticleModalButton" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -91,11 +91,15 @@
 <div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title noteModalTitle" >Notes:</h5>
+      <div class="modal-header noteModalHeader">
+        {{!-- <h5 class="modal-title noteModalTitle" >Notes:</h5>
+        <br> --}}
       </div>
       <div class="modal-body noteModalBody">
-
+        
+      </div>
+      <button class='saveNoteButton'>Save Note</button>
+      <div class='alertDiv'></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
