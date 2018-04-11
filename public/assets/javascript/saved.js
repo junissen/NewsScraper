@@ -82,7 +82,7 @@ $(function() {
                 newCardBody.text(result.note[i].body)
                 newCard.append(newCardHeader);
                 newCard.append(newCardBody);
-                newCard.append("<button class=deleteNoteButton>Delete</button>");
+                newCard.append("<button class=deleteNoteButton data-id=" + i + ">Delete</button>");
 
                 $('.noteModalHeader').append(newCard);
                 
@@ -115,6 +115,14 @@ $(function() {
 
     });
 
-    // $('.deleteNoteButton').on("click", function(event)
+    $('.deleteNoteButton').on("click", function(event) {
+
+        event.preventDefault();
+
+        console.log("clicked");
+
+
+    });
+
 
 });
